@@ -17,7 +17,7 @@ public class GameService {
     private int attemptsLeft;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private RestTemplate restTemplate;          //RestTemplate to make a call to the Random Number Generator API.
 
     private static final String[] GEM_EMOJIS = {
             "💎", "❤️", "🌟", "🔥", "💠", "✨", "🔮", "🌙"
