@@ -12,7 +12,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>gems-of-life</name>
 	<description>Backend logic for the Gems of Life game</description>
-	<url/>
+
 	<licenses>
 		<license>
 			<name>MIT License</name>
@@ -20,6 +20,7 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+
 	<developers>
 		<developer>
 			<id>shaylawhite</id>
@@ -31,14 +32,17 @@
 			</roles>
 		</developer>
 	</developers>
+
 	<scm>
 		<connection>scm:git:git://github.com/ShaylaWhite/Life-Gems.git</connection>
 		<developerConnection>scm:git:ssh://github.com:ShaylaWhite/Life-Gems.git</developerConnection>
 		<url>https://github.com/ShaylaWhite/Life-Gems</url>
 	</scm>
+
 	<properties>
 		<java.version>23</java.version>
 	</properties>
+
 	<dependencies>
 		<!-- Spring Boot Data JPA for Database Access -->
 		<dependency>
@@ -56,6 +60,13 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- Apache HttpClient for making API Calls -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.13</version>
 		</dependency>
 
 		<!-- PostgreSQL Database Driver -->
@@ -85,14 +96,8 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<!-- HTTP Client for making API Calls to External Services -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-		</dependency>
-
 	</dependencies>
+
 	<build>
 		<plugins>
 			<!-- Maven Compiler Plugin for Lombok -->
@@ -125,4 +130,3 @@
 		</plugins>
 	</build>
 </project>
-
