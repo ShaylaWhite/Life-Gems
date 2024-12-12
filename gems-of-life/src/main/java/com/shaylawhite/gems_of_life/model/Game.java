@@ -1,8 +1,6 @@
 package com.shaylawhite.gems_of_life.model;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;  // Mapped to a table in the database (e.g., PostgreSQL).
-import jakarta.persistence.Id;     // This annotation marks the field as the primary key for the entity.
+import jakarta.persistence.*;
 import lombok.Getter;           // Lombok to automatically generate getter methods.
 import lombok.Setter;           // Lombok to automatically generate setter methods.
 import lombok.NoArgsConstructor; // Lombok constructor with no arguments.
@@ -35,6 +33,8 @@ public class Game {
      * The unique identifier for this game. This ID is used as the primary key in the database.
      */
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Automatically generates the primary key.
+
     private Long id; // The primary key for the game entity.
 
     /**
