@@ -1,5 +1,7 @@
 package com.shaylawhite.gems_of_life.service;
 
+import com.shaylawhite.gems_of_life.model.Game;
+import com.shaylawhite.gems_of_life.repository.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +20,8 @@ public class GameService {
     private String secretCode;
     private int maxAttempts = 10;
     private int attemptsLeft;
+    private GameRepository gameRepository;
+
 
     @Autowired
     private RestTemplate restTemplate; // RestTemplate to make a call to the Random Number Generator API.
@@ -36,7 +40,18 @@ public class GameService {
     public String startNewGame() {
         secretCode = generateSecretCode();  // Generate a new secret code.
         attemptsLeft = maxAttempts;  // Reset attempts to the maximum.
+
+        // Create and save new gae object
+        Game game = new Game();
+        game.setSecretCombination(secretCode);
+        game.setRemainingGuesses(attemptsLeft);
+        game.setGameState("in-progress");
+
+        gameRepository.save(game);
+
         return "Game started! Secret code is set. You have " + attemptsLeft + " attempts.";
+
+
     }
 
     /**
@@ -111,4 +126,6 @@ public class GameService {
         }
         return feedback.toString();
     }
+
+
 }
