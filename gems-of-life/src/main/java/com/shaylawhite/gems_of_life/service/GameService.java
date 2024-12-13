@@ -26,10 +26,13 @@ public class GameService {
 
     // Start a new game and generate a secret combination.
     public Game startNewGame() {
-        List<Integer> secretCombination = generateSecretCombination(); // Generate the combination as List<Integer>
-        Game game = new Game(secretCombination); // Pass the List<Integer> to the constructor
-        gameRepository.save(game);
-        return game;
+        Game game = new Game();
+        game.setSecretCombination(generateSecretCombination());
+        game.setRemainingGuesses(10);
+        game.setGameState("in-progress");
+        game.setGuessHistory(new ArrayList<>());
+        game.setLifeLessons(new ArrayList<>());
+        return gameRepository.save(game);
     }
 
     // Check player's guess against the secret combination
@@ -56,32 +59,35 @@ public class GameService {
         game.addGuessHistory(guess, feedback, lifeLesson);
 
         // Decrease remaining guesses and check for game over conditions
-        game.decreaseRemainingGuesses();
-        if (game.getRemainingGuesses() <= 0 || guess.equals(game.getSecretCombination())) {
-            game.setGameOver(true); // Set the game as over
-        }
+        game.decreaseRemainingGuesses();  // This handles both decrementing and checking if the game is over
 
         gameRepository.save(game);
 
-        // If game over, reveal the secret combination
+        // Handle game end conditions
         if (game.isGameOver()) {
-            return guess.equals(game.getSecretCombination()) ?
-                    "Congratulations! You guessed correctly! 🎉" :
-                    "Game Over! The correct combination was: " + mapGuessToEmojis(game.getSecretCombination());
+            if (isGuessCorrect(guess, game.getSecretCombination())) {
+                return "Congratulations! You guessed correctly! 🎉\nLife Lessons Learned: " +
+                        String.join(" | ", game.getLifeLessons());
+            } else {
+                return "Game Over! The correct combination was: " +
+                        mapGuessToEmojis(game.getSecretCombination()) +
+                        "\nFinal Lesson: Every setback is a setup for a comeback.";
+            }
         }
 
-        return feedback + "\nLife Lesson: " + lifeLesson;
+        // Return the feedback and remaining guesses with life lessons after each guess
+        return feedback + "\nLife Lesson: " + lifeLesson + "\nRemaining Guesses: " + game.getRemainingGuesses();
     }
 
     // Helper method to generate the secret combination
     private List<Integer> generateSecretCombination() {
-        return randomGenerator.generateRandomNumbers(4); // Use random generator to fetch 4 numbers
+        return randomGenerator.generateRandomNumbersFromApi(); // Fetch numbers from the API
     }
 
     // Helper method to validate the guess format
     private boolean isValidGuess(String guessInput) {
         String[] guessParts = guessInput.split(" ");
-        return guessParts.length == 4 && guessInput.matches("[0-7] [0-7] [0-7] [0-7]");
+        return guessParts.length == 4 && guessInput.matches("[0-7]( [0-7]){3}");  // Validate format "0-7 0-7 0-7 0-7"
     }
 
     // Convert the input guess to a list of integers
@@ -138,6 +144,10 @@ public class GameService {
         }
         return emojiGuess.toString().trim();
     }
-}
 
+    // Helper method to check if the guess is correct
+    private boolean isGuessCorrect(List<Integer> guess, List<Integer> secretCombination) {
+        return guess.equals(secretCombination);
+    }
+}
 

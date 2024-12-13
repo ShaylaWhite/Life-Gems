@@ -12,19 +12,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/game")
 public class GameController {
 
-    private final GameService gameService;
-
     @Autowired
-    public GameController(GameService gameService) {
-        this.gameService = gameService;
-    }
+    private GameService gameService;
 
+    // Start a new game
     @PostMapping("/start")
     public ResponseEntity<Game> startGame() {
-        Game newGame = gameService.startNewGame();
-        return new ResponseEntity<>(newGame, HttpStatus.CREATED);
+        Game game = gameService.startNewGame();
+        return ResponseEntity.ok(game);
     }
 
+    // Make a guess
     @PostMapping("/guess")
     public ResponseEntity<String> checkGuess(@RequestParam Long gameId, @RequestParam String guess) {
         if (guess == null || guess.trim().isEmpty()) {
@@ -35,11 +33,11 @@ public class GameController {
             String feedback = gameService.checkGuess(gameId, guess);
             return ResponseEntity.ok(feedback);
         } catch (ApiException e) {
-            // Custom exception handling for game not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
         }
     }
-}
 
+
+}
