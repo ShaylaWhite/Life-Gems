@@ -29,7 +29,7 @@ public class GameService {
         int maxAttempts = 10;
 
         Game game = new Game();
-        game.setSecretCombination(secretCode);
+        game.setSecretCombination(secretCode);  // Set the secretCombination as a string
         game.setRemainingGuesses(maxAttempts);
         game.setGameState("in-progress");
 

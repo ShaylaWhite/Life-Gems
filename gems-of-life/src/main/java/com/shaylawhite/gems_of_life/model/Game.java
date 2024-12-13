@@ -1,15 +1,8 @@
 package com.shaylawhite.gems_of_life.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;           // Lombok to automatically generate getter methods.
-import lombok.Setter;           // Lombok to automatically generate setter methods.
-import lombok.NoArgsConstructor; // Lombok constructor with no arguments.
-import lombok.AllArgsConstructor; // Lombok constructor with all arguments.
-
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 
 /**
  * Represents a game of Gems of Life. This entity is stored in the database and contains
@@ -20,10 +13,6 @@ import javax.persistence.Id;
  * with feedback provided after each guess. The game ends when the player guesses correctly
  * or runs out of remaining guesses.
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity // Indicates that this class should be mapped to a table in the database
 public class Game {
 
@@ -36,15 +25,13 @@ public class Game {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // Automatically generates the primary key.
-
     private Long id; // The primary key for the game entity.
 
     /**
      * The secret combination of gems (numbers) that the player is trying to guess.
      * This would be stored as a list of integers.
      */
-    @ElementCollection
-    private List<Integer> secretCombination;  // List of integers representing the secret combination.
+    private String secretCombination;  // Change this to String
 
     /**
      * The number of remaining guesses the player has.
@@ -73,7 +60,62 @@ public class Game {
         this.guessHistory = new ArrayList<>();
         this.gameState = "in-progress";
         this.remainingGuesses = 10;  // Example default value.
-        this.secretCombination = new ArrayList<>();
+        this.secretCombination = "";
+    }
+
+    /**
+     * Constructor with all arguments.
+     */
+    public Game(Long id, String secretCombination, int remainingGuesses, String gameState, List<String> guessHistory) {
+        this.id = id;
+        this.secretCombination = secretCombination;
+        this.remainingGuesses = remainingGuesses;
+        this.gameState = gameState;
+        this.guessHistory = guessHistory != null ? guessHistory : new ArrayList<>();
+    }
+
+    // =======================
+    // Getter and Setter Methods
+    // =======================
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getSecretCombination() {
+        return secretCombination;
+    }
+
+    public void setSecretCombination(String secretCombination) {
+        this.secretCombination = secretCombination;
+    }
+
+    public int getRemainingGuesses() {
+        return remainingGuesses;
+    }
+
+    public void setRemainingGuesses(int remainingGuesses) {
+        this.remainingGuesses = remainingGuesses;
+    }
+
+    public String getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(String gameState) {
+        this.gameState = gameState;
+    }
+
+    public List<String> getGuessHistory() {
+        return guessHistory;
+    }
+
+    public void setGuessHistory(List<String> guessHistory) {
+        this.guessHistory = guessHistory;
     }
 
     // =======================
@@ -131,4 +173,3 @@ public class Game {
                 ", gameState='" + gameState + "'}";
     }
 }
-
