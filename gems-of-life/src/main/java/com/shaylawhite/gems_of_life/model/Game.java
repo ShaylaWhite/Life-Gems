@@ -1,6 +1,10 @@
 package com.shaylawhite.gems_of_life.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,60 +17,50 @@ import java.util.List;
  * with feedback provided after each guess. The game ends when the player guesses correctly
  * or runs out of remaining guesses.
  */
-@Entity // Indicates that this class should be mapped to a table in the database
+@Entity
 public class Game {
 
     // =======================
     // Entity Attributes
     // =======================
-
-    /**
-     * The unique identifier for this game. This ID is used as the primary key in the database.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // Automatically generates the primary key.
-    private Long id; // The primary key for the game entity.
+    private Long id;
 
-    /**
-     * The secret combination of gems (numbers) that the player is trying to guess.
-     * This would be stored as a list of integers.
-     */
-    private String secretCombination;  // Change this to String
-
-    /**
-     * The number of remaining guesses the player has.
-     */
-    private int remainingGuesses;
-
-    /**
-     * The current state of the game (e.g., "in-progress", "won", "lost").
-     */
-    private String gameState;
-
-    /**
-     * A list that tracks the history of guesses and feedback.
-     */
     @ElementCollection
-    private List<String> guessHistory;
+    private List<Integer> secretCombination;  // The secret combination of gems (numbers).
+
+    private boolean isGameOver;
+    private int remainingGuesses;  // The number of remaining guesses the player has.
+    private String gameState;  // The current state of the game (e.g., "in-progress", "won", "lost").
+
+    @ElementCollection
+    private List<String> guessHistory;  // Tracks the history of guesses and feedback.
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;  // Timestamp when the game was created.
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;  // Timestamp when the game was last updated.
 
     // =======================
     // Constructors
     // =======================
-
     /**
      * Default constructor that initializes the game with default values.
      */
-    public Game() {
+    public Game(List<Integer> secretCombination) {
+        this.secretCombination = secretCombination;
+        this.remainingGuesses = 10;  // Default number of guesses.
         this.guessHistory = new ArrayList<>();
-        this.gameState = "in-progress";
-        this.remainingGuesses = 10;  // Example default value.
-        this.secretCombination = "";
+        this.isGameOver = false;
+        this.gameState = "in-progress";  // Default game state.
     }
 
     /**
      * Constructor with all arguments.
      */
-    public Game(Long id, String secretCombination, int remainingGuesses, String gameState, List<String> guessHistory) {
+    public Game(Long id, List<Integer> secretCombination, int remainingGuesses, String gameState, List<String> guessHistory) {
         this.id = id;
         this.secretCombination = secretCombination;
         this.remainingGuesses = remainingGuesses;
@@ -77,7 +71,6 @@ public class Game {
     // =======================
     // Getter and Setter Methods
     // =======================
-
     public Long getId() {
         return id;
     }
@@ -86,11 +79,11 @@ public class Game {
         this.id = id;
     }
 
-    public String getSecretCombination() {
+    public List<Integer> getSecretCombination() {
         return secretCombination;
     }
 
-    public void setSecretCombination(String secretCombination) {
+    public void setSecretCombination(List<Integer> secretCombination) {
         this.secretCombination = secretCombination;
     }
 
@@ -121,7 +114,6 @@ public class Game {
     // =======================
     // Helper Methods
     // =======================
-
     /**
      * Decreases the number of remaining guesses.
      * If no guesses are left, the game is marked as lost.
@@ -131,7 +123,7 @@ public class Game {
             remainingGuesses--;
         }
         if (remainingGuesses == 0) {
-            gameState = "lost"; // Mark the game as lost when no guesses remain.
+            gameState = "lost";  // Mark the game as lost when no guesses remain.
         }
     }
 
@@ -158,7 +150,6 @@ public class Game {
     // =======================
     // Overridden Methods
     // =======================
-
     /**
      * Returns a string representation of the current game state.
      * This can be helpful for debugging and displaying game status.

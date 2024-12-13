@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// business logic
 @Service
 public class GameService {
 
@@ -38,26 +39,39 @@ public class GameService {
         return "Game started! Secret code is set. You have " + maxAttempts + " attempts.";
     }
 
-    public String checkGuess(String guess, Long gameId) {
-        Game game = gameRepository.findById(gameId).orElseThrow(() -> new RuntimeException("Game not found"));
+    public String checkGuess(Long gameId, String guess) {
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new RuntimeException("Game not found"));
 
-        if (game.getRemainingGuesses() == 0) {
-            return "Game over. No attempts left!";
+        // Input validation: Ensure guess is a valid number of the correct length
+        if (guess.length() != game.getSecretCombination().size()) {
+            return "Invalid guess. Please enter a guess of correct length.";
         }
 
-        if (guess.equals(game.getSecretCombination())) {
-            return "Congratulations! You've guessed the correct code!";
+        if (game.isGameOver()) {
+            return "Game Over. Please start a new game.";
         }
 
-        game.setRemainingGuesses(game.getRemainingGuesses() - 1);
-        String feedback = provideFeedback(guess, game.getSecretCombination());
+        List<Integer> guessList = parseGuess(guess);
+        String feedback = generateFeedback(game.getSecretCombination(), guessList);
+
+        // Add guess and feedback to history
+        game.addGuessHistory(guess, feedback);
+
+        // Decrease remaining guesses and check for game over conditions
+        game.decreaseRemainingGuesses();
+        if (game.getRemainingGuesses() <= 0 || game.getSecretCombination().equals(guessList)) {
+            game.setGameOver(true);
+        }
+
         gameRepository.save(game);
-
-        return "Feedback: " + feedback + ". Attempts left: " + game.getRemainingGuesses();
+        return feedback;
     }
+
 
     private String generateSecretCode() {
         List<Integer> randomNumbers = randomGenerator.generateRandomNumbers();
+        System.out.println("Generated random numbers: " + randomNumbers);
         return randomNumbers.stream()
                 .map(num -> GEM_EMOJIS[num])
                 .collect(Collectors.joining());
