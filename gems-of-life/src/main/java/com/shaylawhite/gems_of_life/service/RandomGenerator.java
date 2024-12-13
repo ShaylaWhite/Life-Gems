@@ -21,15 +21,13 @@ public class RandomGenerator {
 
     public List<Integer> generateRandomNumbers(int count) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
-            String url = String.format("%s?num=%d&min=0&max=9&col=1&base=10&format=plain&rnd=new", RANDOM_API_URL, count);
+            String url = String.format("%s?num=%d&min=0&max=7&col=1&base=10&format=plain", RANDOM_ORG_URL, count);
             String response = restTemplate.getForObject(url, String.class);
 
             return Arrays.stream(response.split("\n"))
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            // Fallback: generate numbers locally if the API fails
             System.out.println("API request failed, generating random numbers locally.");
             return generateRandomNumbersLocally(count);
         }
@@ -37,9 +35,8 @@ public class RandomGenerator {
 
     private List<Integer> generateRandomNumbersLocally(int count) {
         Random random = new Random();
-        return random.ints(count, 0, 10)
+        return random.ints(count, 0, 8)  // Changed the max to 8 to match GEM_EMOJIS array size.
                 .boxed()
                 .collect(Collectors.toList());
     }
-
 }

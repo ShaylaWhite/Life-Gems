@@ -147,6 +147,28 @@ public class Game {
         guessHistory.add("Guess: " + guess + " - " + feedback);
     }
 
+    /**
+     * Sets the game as over and updates the game state.
+     */
+    public void setGameOver(boolean gameOver) {
+        this.isGameOver = gameOver;
+        if (gameOver) {
+            this.gameState = "lost";  // Optionally, mark the game as lost when it's over
+        }
+    }
+
+    /**
+     * Adds a new guess history entry with feedback and a life lesson.
+     *
+     * @param guess      The player's guess.
+     * @param feedback   The feedback for the guess.
+     * @param lifeLesson The life lesson associated with the guess.
+     */
+    public void addGuessHistory(List<Integer> guess, String feedback, String lifeLesson) {
+        GuessHistory entry = new GuessHistory(guess, feedback, lifeLesson);
+        this.guessHistory.add(entry.toString());  // Convert to string representation of GuessHistory
+    }
+
     // =======================
     // Overridden Methods
     // =======================
@@ -163,4 +185,53 @@ public class Game {
                 ", remainingGuesses=" + remainingGuesses +
                 ", gameState='" + gameState + "'}";
     }
+
+    // =======================
+    // Inner Class for Guess History
+    // =======================
+    public static class GuessHistory {
+        private List<Integer> guess;
+        private String feedback;
+        private String lifeLesson;
+
+        // Constructor
+        public GuessHistory(List<Integer> guess, String feedback, String lifeLesson) {
+            this.guess = guess;
+            this.feedback = feedback;
+            this.lifeLesson = lifeLesson;
+        }
+
+        // Getters and setters for GuessHistory attributes
+        public List<Integer> getGuess() {
+            return guess;
+        }
+
+        public void setGuess(List<Integer> guess) {
+            this.guess = guess;
+        }
+
+        public String getFeedback() {
+            return feedback;
+        }
+
+        public void setFeedback(String feedback) {
+            this.feedback = feedback;
+        }
+
+        public String getLifeLesson() {
+            return lifeLesson;
+        }
+
+        public void setLifeLesson(String lifeLesson) {
+            this.lifeLesson = lifeLesson;
+        }
+
+        // Convert GuessHistory to string representation
+        @Override
+        public String toString() {
+            return "Guess: " + guess + " - Feedback: " + feedback + " - Life Lesson: " + lifeLesson;
+        }
+    }
 }
+
+

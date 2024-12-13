@@ -1,4 +1,12 @@
 package com.shaylawhite.gems_of_life.exception;
 
-public class ApiException {
+public class ApiException extends RuntimeException {
+
+    public ApiException(String message) {
+        super(message);
+    }
+
+    public ApiException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

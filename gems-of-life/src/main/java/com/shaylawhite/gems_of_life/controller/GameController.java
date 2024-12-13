@@ -1,5 +1,6 @@
 package com.shaylawhite.gems_of_life.controller;
 
+import com.shaylawhite.gems_of_life.exception.ApiException;
 import com.shaylawhite.gems_of_life.model.Game;
 import com.shaylawhite.gems_of_life.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,9 @@ public class GameController {
         }
 
         try {
-            // Assuming this method returns feedback (String) after processing the guess.
             String feedback = gameService.checkGuess(gameId, guess);
             return ResponseEntity.ok(feedback);
-        } catch (GameNotFoundException e) {
+        } catch (ApiException e) {
             // Custom exception handling for game not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found.");
         } catch (Exception e) {
@@ -42,3 +42,4 @@ public class GameController {
         }
     }
 }
+
