@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor; // Lombok constructor with all arguments.
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 /**
  * Represents a game of Gems of Life. This entity is stored in the database and contains
