@@ -1,1 +1,76 @@
-<h1> hello world</h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gems of Life</title>
+</head>
+<body>
+<h1>Gems of Life</h1>
+<p><strong>Remaining Guesses:</strong> <span id="remaining-guesses">10</span></p>
+<p><strong>Current Level:</strong> <span id="current-level">1</span></p>
+<p><strong>Current Life Lesson:</strong> <span id="current-life-lesson">Start a new game to learn a life lesson!</span></p>
+
+<h2>Feedback</h2>
+<p id="feedback">Start a new game first!</p>
+
+<input type="text" id="guess" placeholder="Enter your guess (e.g., 1234)" />
+<button onclick="makeGuess()">Make Guess</button>
+<button onclick="startNewGame()">Start New Game</button>
+
+<h2>Guess History</h2>
+<ul id="guess-history">
+    <!-- Guess history items will appear here -->
+</ul>
+
+<script>
+    // Placeholder for actual game state
+    let gameState = {
+        remainingAttempts: 10,
+        currentLevel: 1,
+        currentLifeLesson: "Start a new game to learn a life lesson!",
+        guessesHistory: [],
+    };
+
+    function updateUI() {
+        document.getElementById("remaining-guesses").textContent = gameState.remainingAttempts;
+        document.getElementById("current-level").textContent = gameState.currentLevel;
+        document.getElementById("current-life-lesson").textContent = gameState.currentLifeLesson;
+        const history = document.getElementById("guess-history");
+        history.innerHTML = "";
+        gameState.guessesHistory.forEach(guess => {
+            const li = document.createElement("li");
+            li.textContent = guess;
+            history.appendChild(li);
+        });
+    }
+
+    function startNewGame() {
+        // Replace this with an actual API call
+        gameState = {
+            remainingAttempts: 10,
+            currentLevel: 1,
+            currentLifeLesson: "Grit",
+            guessesHistory: [],
+        };
+        updateUI();
+    }
+
+    function makeGuess() {
+        const guess = document.getElementById("guess").value;
+        if (!guess) return;
+
+        // Mock logic for guessing
+        if (guess === "1234") {
+            gameState.remainingAttempts--;
+            gameState.currentLevel++;
+            gameState.currentLifeLesson = "Self-Learning";
+            gameState.guessesHistory.push(`Guess: ${guess} - Feedback: Correct!`);
+        } else {
+            gameState.remainingAttempts--;
+            gameState.guessesHistory.push(`Guess: ${guess} - Feedback: Incorrect.`);
+        }
+        updateUI();
+    }
+</script>
+</body>
+</html>
+

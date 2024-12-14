@@ -1,153 +1,86 @@
 package com.shaylawhite.gems_of_life.model;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-@Entity
 public class Game {
+    private int[] randomCombination; // The secret combination the player needs to guess
+    private List<int[]> guessesHistory; // List of past guesses
+    private int attemptsLeft; // Number of remaining attempts
+    private String currentLifeLesson; // The life lesson associated with the current level
+    private boolean isWon; // Flag indicating whether the game is won
+    private int currentLevel; // The current level the player is at
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private List<String> lifeLessons = new ArrayList<>(
+            Arrays.asList(
+                    "💎 Grit: Keep pushing through challenges, and you will reach your goal.",
+                    "✨ Self-Learning: Embrace new knowledge and skills to advance in life.",
+                    "🔍 Problem-Solving: Every challenge is an opportunity to find a creative solution.",
+                    "💪 Perseverance: Consistency is key, even when things seem tough.",
+                    "🔥 Passion: Follow your heart, and your passion will drive your success.",
+                    "💖 Self-Worth: Recognize your value, and don’t let others define it.",
+                    "💫 Belief in Yourself: You are capable of achieving great things.",
+                    "🌟 Uniqueness: Embrace what makes you different, it’s your superpower."
+            )
+    );
 
-    @ElementCollection
-    private List<Integer> secretCombination;
-
-    private boolean isGameOver;
-    private int remainingGuesses;
-    private String gameState;
-
-    @ElementCollection
-    private List<String> guessHistory;
-
-    @ElementCollection
-    private List<String> lifeLessons;  // New field for storing life lessons
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
+    // Constructor
     public Game() {
-        this.guessHistory = new ArrayList<>();
-        this.lifeLessons = new ArrayList<>();  // Initialize the lifeLessons list
+        this.randomCombination = new int[4];
+        this.guessesHistory = new ArrayList<>();
+        this.attemptsLeft = 10; // Default number of attempts
+        this.isWon = false;
+        this.currentLevel = 1; // Start at level 1
     }
 
-    public Game(List<Integer> secretCombination) {
-        this.secretCombination = secretCombination;
-        this.remainingGuesses = 10;
-        this.guessHistory = new ArrayList<>();
-        this.lifeLessons = new ArrayList<>();  // Initialize the lifeLessons list
-        this.isGameOver = false;
-        this.gameState = "in-progress";
+    // Getters and Setters
+    public int[] getRandomCombination() {
+        return randomCombination;
     }
 
-    public Long getId() {
-        return id;
+    public void setRandomCombination(int[] randomCombination) {
+        this.randomCombination = randomCombination;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public List<int[]> getGuessesHistory() {
+        return guessesHistory;
     }
 
-    public List<Integer> getSecretCombination() {
-        return secretCombination;
+    public void setGuessesHistory(List<int[]> guessesHistory) {
+        this.guessesHistory = guessesHistory;
     }
 
-    public void setSecretCombination(List<Integer> secretCombination) {
-        this.secretCombination = secretCombination;
+    public int getAttemptsLeft() {
+        return attemptsLeft;
     }
 
-    public int getRemainingGuesses() {
-        return remainingGuesses;
+    public void setAttemptsLeft(int attemptsLeft) {
+        this.attemptsLeft = attemptsLeft;
     }
 
-    public void setRemainingGuesses(int remainingGuesses) {
-        this.remainingGuesses = remainingGuesses;
+    public String getCurrentLifeLesson() {
+        return currentLifeLesson;
     }
 
-    public String getGameState() {
-        return gameState;
+    public void setCurrentLifeLesson(String currentLifeLesson) {
+        this.currentLifeLesson = currentLifeLesson;
     }
 
-    public void setGameState(String gameState) {
-        this.gameState = gameState;
+    public boolean isWon() {
+        return isWon;
     }
 
-    public List<String> getGuessHistory() {
-        return guessHistory;
+    public void setWon(boolean isWon) {
+        this.isWon = isWon;
     }
 
-    public void setGuessHistory(List<String> guessHistory) {
-        this.guessHistory = guessHistory;
+    public int getCurrentLevel() {
+        return currentLevel;
     }
 
-    public List<String> getLifeLessons() {
-        return lifeLessons;  // Getter for life lessons
-    }
-
-    public void setLifeLessons(List<String> lifeLessons) {
-        this.lifeLessons = lifeLessons;  // Setter for life lessons
-    }
-
-    public void decreaseRemainingGuesses() {
-        if (remainingGuesses > 0) {
-            remainingGuesses--;
-        }
-        if (remainingGuesses == 0) {
-            gameState = "lost";
-        }
-    }
-
-    public boolean isGameOver() {
-        return remainingGuesses == 0 || "won".equals(gameState);
-    }
-
-    public void setGameOver(boolean gameOver) {
-        this.isGameOver = gameOver;
-        if (gameOver) {
-            this.gameState = "lost";
-        }
-    }
-
-    public void addGuessHistory(List<Integer> guess, String feedback, String lifeLesson) {
-        GuessHistory entry = new GuessHistory(guess, feedback, lifeLesson);
-        this.guessHistory.add(entry.toString());
-        this.lifeLessons.add(lifeLesson);  // Add the life lesson to the history
-    }
-
-    @Override
-    public String toString() {
-        return "Game{id=" + id +
-                ", secretCombination=" + secretCombination +
-                ", remainingGuesses=" + remainingGuesses +
-                ", gameState='" + gameState + "'}";
-    }
-
-    public static class GuessHistory {
-        private List<Integer> guess;
-        private String feedback;
-        private String lifeLesson;
-
-        public GuessHistory(List<Integer> guess, String feedback, String lifeLesson) {
-            this.guess = guess;
-            this.feedback = feedback;
-            this.lifeLesson = lifeLesson;
-        }
-
-        @Override
-        public String toString() {
-            return "Guess{" +
-                    "guess=" + guess +
-                    ", feedback='" + feedback + '\'' +
-                    ", lifeLesson='" + lifeLesson + '\'' +
-                    '}';
-        }
+    public void setCurrentLevel(int currentLevel) {
+        this.currentLevel = currentLevel;
     }
 }
+

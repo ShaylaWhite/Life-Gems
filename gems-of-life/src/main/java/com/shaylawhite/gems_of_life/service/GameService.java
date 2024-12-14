@@ -1,153 +1,111 @@
 package com.shaylawhite.gems_of_life.service;
 
+import com.shaylawhite.gems_of_life.exception.GameNotFoundException;
 import com.shaylawhite.gems_of_life.model.Game;
-import com.shaylawhite.gems_of_life.repository.GameRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class GameService {
 
-    private static final String[] GEM_EMOJIS = {
-            "💎", "🪙", "🌟", "🔥", "💠", "✨", "🔮", "🌙"
-    };
+    private Game currentGame;
 
-    private final GameRepository gameRepository;
-    private final RandomGenerator randomGenerator;
+    private List<String> lifeLessons = new ArrayList<>(Arrays.asList(
+            "Grit: Keep pushing through challenges, and you will reach your goal. 💎",
+            "Self-Learning: Embrace new knowledge and skills to advance in life. ✨",
+            "Problem-Solving: Every challenge is an opportunity to find a creative solution. 🔍",
+            "Perseverance: Consistency is key, even when things seem tough. 💪",
+            "Passion: Follow your heart, and your passion will drive your success. 🔥",
+            "Self-Worth: Recognize your value, and don’t let others define it. 💖",
+            "Belief in Yourself: You are capable of achieving great things. 💫",
+            "Uniqueness: Embrace what makes you different, it’s your superpower. 🌟"
+    ));
 
-    @Autowired
-    public GameService(GameRepository gameRepository, RandomGenerator randomGenerator) {
-        this.gameRepository = gameRepository;
-        this.randomGenerator = randomGenerator;
-    }
 
-    // Start a new game and generate a secret combination.
+    // Start a new game and initialize game state
     public Game startNewGame() {
-        Game game = new Game();
-        game.setSecretCombination(generateSecretCombination());
-        game.setRemainingGuesses(10);
-        game.setGameState("in-progress");
-        game.setGuessHistory(new ArrayList<>());
-        game.setLifeLessons(new ArrayList<>());
-        return gameRepository.save(game);
+        currentGame = new Game();
+        int[] randomCombination = generateRandomCombination();
+        currentGame.setRandomCombination(randomCombination);
+        currentGame.setAttemptsLeft(10); // Reset attempts to 10
+        currentGame.setWon(false); // Set game as not won initially
+        currentGame.setGuessesHistory(new ArrayList<>());
+        currentGame.setCurrentLevel(1); // Start at level 1
+        currentGame.setCurrentLifeLesson(lifeLessons.get(0)); // First lesson: "Grit"
+        return currentGame;
     }
 
-    // Check player's guess against the secret combination
-    public String checkGuess(Long gameId, String guessInput) {
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+    // Generate a random combination of 4 numbers between 0 and 7 (inclusive)
+    private int[] generateRandomCombination() {
+        int[] combination = new int[4];
+        for (int i = 0; i < 4; i++) {
+            combination[i] = (int) (Math.random() * 8); // Random number between 0 and 7
+        }
+        return combination;
+    }
 
-        if (game.isGameOver()) {
-            return "Game Over. Please start a new game.";
+    // Check the player's guess and return feedback
+    public String checkGuess(List<Integer> playerGuess) {
+        // If there is no active game, throw a custom exception
+        if (currentGame == null) {
+            throw new GameNotFoundException("No active game found. Please start a new game.");
         }
 
-        // Validate the input format (4 numbers separated by spaces)
-        if (!isValidGuess(guessInput)) {
-            return "Invalid guess format. Please enter 4 numbers between 0-7 separated by spaces.";
+        if (currentGame.getAttemptsLeft() <= 0) {
+            return "Game over! You've used all attempts.";
         }
 
-        List<Integer> guess = parseGuess(guessInput); // Convert input into a List<Integer>
-        String feedback = provideFeedback(guess, game.getSecretCombination());
+        int correctPositions = 0;
+        int correctNumbers = 0;
 
-        // Determine the life lesson based on feedback
-        String lifeLesson = determineLifeLesson(feedback);
-
-        // Add guess, feedback, and life lesson to history
-        game.addGuessHistory(guess, feedback, lifeLesson);
-
-        // Decrease remaining guesses and check for game over conditions
-        game.decreaseRemainingGuesses();  // This handles both decrementing and checking if the game is over
-
-        gameRepository.save(game);
-
-        // Handle game end conditions
-        if (game.isGameOver()) {
-            if (isGuessCorrect(guess, game.getSecretCombination())) {
-                return "Congratulations! You guessed correctly! 🎉\nLife Lessons Learned: " +
-                        String.join(" | ", game.getLifeLessons());
-            } else {
-                return "Game Over! The correct combination was: " +
-                        mapGuessToEmojis(game.getSecretCombination()) +
-                        "\nFinal Lesson: Every setback is a setup for a comeback.";
+        // Compare guess to the random combination
+        for (int i = 0; i < 4; i++) {
+            if (playerGuess.get(i) == currentGame.getRandomCombination()[i]) {
+                correctPositions++;
+            } else if (contains(currentGame.getRandomCombination(), playerGuess.get(i))) {
+                correctNumbers++;
             }
         }
 
-        // Return the feedback and remaining guesses with life lessons after each guess
-        return feedback + "\nLife Lesson: " + lifeLesson + "\nRemaining Guesses: " + game.getRemainingGuesses();
-    }
+        currentGame.setAttemptsLeft(currentGame.getAttemptsLeft() - 1);
 
-    // Helper method to generate the secret combination
-    private List<Integer> generateSecretCombination() {
-        return randomGenerator.generateRandomNumbersFromApi(); // Fetch numbers from the API
-    }
-
-    // Helper method to validate the guess format
-    private boolean isValidGuess(String guessInput) {
-        String[] guessParts = guessInput.split(" ");
-        return guessParts.length == 4 && guessInput.matches("[0-7]( [0-7]){3}");  // Validate format "0-7 0-7 0-7 0-7"
-    }
-
-    // Convert the input guess to a list of integers
-    private List<Integer> parseGuess(String guessInput) {
-        String[] guessParts = guessInput.split(" ");
-        List<Integer> guess = new ArrayList<>();
-        for (String part : guessParts) {
-            guess.add(Integer.parseInt(part.trim()));
+        // Check if the player has won the game
+        if (correctPositions == 4) {
+            currentGame.setWon(true);
+            String feedback = "Congratulations! You've cracked the code.";
+            currentGame.setCurrentLevel(currentGame.getCurrentLevel() + 1); // Increment level
+            // Assign new life lesson based on level
+            if (currentGame.getCurrentLevel() - 1 < lifeLessons.size()) {
+                currentGame.setCurrentLifeLesson(lifeLessons.get(currentGame.getCurrentLevel() - 1));
+                feedback += " 🌟 You've advanced to the next level: " + currentGame.getCurrentLifeLesson();
+            }
+            return feedback;
         }
-        return guess;
+
+        return "You got " + correctPositions + " correct positions and " + correctNumbers + " correct numbers.";
     }
 
-    // Generate feedback based on the guess and the secret combination
-    private String provideFeedback(List<Integer> guess, List<Integer> secretCombination) {
-        int correctPosition = 0;
-        int correctGem = 0;
-
-        for (int i = 0; i < secretCombination.size(); i++) {
-            if (guess.get(i).equals(secretCombination.get(i))) {
-                correctPosition++;
-            } else if (secretCombination.contains(guess.get(i))) {
-                correctGem++;
+    // Helper function to check if a number exists in the random combination
+    private boolean contains(int[] array, int number) {
+        for (int num : array) {
+            if (num == number) {
+                return true;
             }
         }
-
-        return correctPosition + " correct positions, " + correctGem + " correct gems.";
+        return false;
     }
 
-    // Generate a life lesson based on the number of correct positions in the guess
-    private String determineLifeLesson(String feedback) {
-        int correctPositions = Integer.parseInt(feedback.split(" ")[0]);
-
-        switch (correctPositions) {
-            case 0:
-                return "Every step forward, no matter how small, is growth. Keep moving forward.";
-            case 1:
-                return "You are valuable beyond measure. Never let anyone make you forget that.";
-            case 2:
-                return "Perseverance is the key to success. Keep pushing forward!";
-            case 3:
-                return "Great things take time, and you are making progress every step of the way!";
-            case 4:
-                return "Congratulations, you unlocked the lesson of self-worth. You are worthy!";
-            default:
-                return "Keep learning and growing. Every step counts.";
-        }
+    // Get the current game instance
+    public Game getCurrentGame() {
+        return currentGame;
     }
 
-    // Map the guessed numbers to their respective gem emojis
-    private String mapGuessToEmojis(List<Integer> guess) {
-        StringBuilder emojiGuess = new StringBuilder();
-        for (Integer gem : guess) {
-            emojiGuess.append(GEM_EMOJIS[gem]).append(" ");
-        }
-        return emojiGuess.toString().trim();
-    }
-
-    // Helper method to check if the guess is correct
-    private boolean isGuessCorrect(List<Integer> guess, List<Integer> secretCombination) {
-        return guess.equals(secretCombination);
+    // Check if there is an active game
+    public boolean isGameActive() {
+        return currentGame != null;
     }
 }
 

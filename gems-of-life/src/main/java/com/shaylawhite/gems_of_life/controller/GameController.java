@@ -1,12 +1,12 @@
 package com.shaylawhite.gems_of_life.controller;
 
-import com.shaylawhite.gems_of_life.exception.ApiException;
-import com.shaylawhite.gems_of_life.model.Game;
+import com.shaylawhite.gems_of_life.model.*;
 import com.shaylawhite.gems_of_life.service.GameService;
+import com.shaylawhite.gems_of_life.exception.GameNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/game")
@@ -17,27 +17,42 @@ public class GameController {
 
     // Start a new game
     @PostMapping("/start")
-    public ResponseEntity<Game> startGame() {
+    public GameResponse startGame() {
         Game game = gameService.startNewGame();
-        return ResponseEntity.ok(game);
+        return new GameResponse("Game started!", game.getAttemptsLeft(), game.getCurrentLevel(), game.isWon(), game.getCurrentLifeLesson());
     }
 
-    // Make a guess
+    // Make a guess and get feedback
     @PostMapping("/guess")
-    public ResponseEntity<String> checkGuess(@RequestParam Long gameId, @RequestParam String guess) {
-        if (guess == null || guess.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Guess cannot be empty.");
-        }
-
+    public GameResponse makeGuess(@RequestBody GuessRequest request) {
         try {
-            String feedback = gameService.checkGuess(gameId, guess);
-            return ResponseEntity.ok(feedback);
-        } catch (ApiException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
+            String feedback = gameService.checkGuess(request.getGuess());
+            Game currentGame = gameService.getCurrentGame();
+
+            if (currentGame.isWon()) {
+                feedback += " 💎 You've advanced to the next level: " + currentGame.getCurrentLifeLesson() + " 🌟";
+            }
+
+            return new GameResponse(feedback, currentGame.getAttemptsLeft(), currentGame.getCurrentLevel(), currentGame.isWon(), currentGame.getCurrentLifeLesson());
+        } catch (GameNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
-
+    // Get current game status
+    @GetMapping("/status")
+    public Game getStatus() {
+        try {
+            return gameService.getCurrentGame();
+        } catch (GameNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 }
+
+
+
+
+
+
+
