@@ -24,32 +24,30 @@ public class GameService {
             "Uniqueness: Embrace what makes you different, it’s your superpower. 🌟"
     ));
 
-
     // Start a new game and initialize game state
     public Game startNewGame() {
         currentGame = new Game();
-        int[] randomCombination = generateRandomCombination();
+        List<Integer> randomCombination = generateRandomCombination();
         currentGame.setRandomCombination(randomCombination);
         currentGame.setAttemptsLeft(10); // Reset attempts to 10
         currentGame.setWon(false); // Set game as not won initially
-        currentGame.setGuessesHistory(new ArrayList<>());
+        currentGame.setGuessesHistory(new ArrayList<>()); // Initialize guess history
         currentGame.setCurrentLevel(1); // Start at level 1
         currentGame.setCurrentLifeLesson(lifeLessons.get(0)); // First lesson: "Grit"
         return currentGame;
     }
 
     // Generate a random combination of 4 numbers between 0 and 7 (inclusive)
-    private int[] generateRandomCombination() {
-        int[] combination = new int[4];
+    private List<Integer> generateRandomCombination() {
+        List<Integer> combination = new ArrayList<>(4);
         for (int i = 0; i < 4; i++) {
-            combination[i] = (int) (Math.random() * 8); // Random number between 0 and 7
+            combination.add((int) (Math.random() * 8)); // Random number between 0 and 7
         }
         return combination;
     }
 
     // Check the player's guess and return feedback
     public String checkGuess(List<Integer> playerGuess) {
-        // If there is no active game, throw a custom exception
         if (currentGame == null) {
             throw new GameNotFoundException("No active game found. Please start a new game.");
         }
@@ -61,23 +59,25 @@ public class GameService {
         int correctPositions = 0;
         int correctNumbers = 0;
 
-        // Compare guess to the random combination
+        List<Integer> randomCombination = currentGame.getRandomCombination();
         for (int i = 0; i < 4; i++) {
-            if (playerGuess.get(i) == currentGame.getRandomCombination()[i]) {
+            if (playerGuess.get(i).equals(randomCombination.get(i))) {
                 correctPositions++;
-            } else if (contains(currentGame.getRandomCombination(), playerGuess.get(i))) {
+            } else if (randomCombination.contains(playerGuess.get(i))) {
                 correctNumbers++;
             }
         }
 
+        // Save the guess to history
+        currentGame.getGuessesHistory().add(new ArrayList<>(playerGuess));
+
         currentGame.setAttemptsLeft(currentGame.getAttemptsLeft() - 1);
 
-        // Check if the player has won the game
         if (correctPositions == 4) {
             currentGame.setWon(true);
             String feedback = "Congratulations! You've cracked the code.";
-            currentGame.setCurrentLevel(currentGame.getCurrentLevel() + 1); // Increment level
-            // Assign new life lesson based on level
+            currentGame.setCurrentLevel(currentGame.getCurrentLevel() + 1);
+
             if (currentGame.getCurrentLevel() - 1 < lifeLessons.size()) {
                 currentGame.setCurrentLifeLesson(lifeLessons.get(currentGame.getCurrentLevel() - 1));
                 feedback += " 🌟 You've advanced to the next level: " + currentGame.getCurrentLifeLesson();
@@ -86,16 +86,6 @@ public class GameService {
         }
 
         return "You got " + correctPositions + " correct positions and " + correctNumbers + " correct numbers.";
-    }
-
-    // Helper function to check if a number exists in the random combination
-    private boolean contains(int[] array, int number) {
-        for (int num : array) {
-            if (num == number) {
-                return true;
-            }
-        }
-        return false;
     }
 
     // Get the current game instance
@@ -108,4 +98,6 @@ public class GameService {
         return currentGame != null;
     }
 }
+
+
 

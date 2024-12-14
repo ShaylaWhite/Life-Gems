@@ -19,7 +19,7 @@ public class GameController {
     @PostMapping("/start")
     public GameResponse startGame() {
         Game game = gameService.startNewGame();
-        return new GameResponse("Game started!", game.getAttemptsLeft(), game.getCurrentLevel(), game.isWon(), game.getCurrentLifeLesson());
+        return new GameResponse("Game started!", game.getAttemptsLeft(), game.getCurrentLevel(), game.isWon(), game.getCurrentLifeLesson(), game.getGuessesHistory());
     }
 
     // Make a guess and get feedback
@@ -33,7 +33,7 @@ public class GameController {
                 feedback += " 💎 You've advanced to the next level: " + currentGame.getCurrentLifeLesson() + " 🌟";
             }
 
-            return new GameResponse(feedback, currentGame.getAttemptsLeft(), currentGame.getCurrentLevel(), currentGame.isWon(), currentGame.getCurrentLifeLesson());
+            return new GameResponse(feedback, currentGame.getAttemptsLeft(), currentGame.getCurrentLevel(), currentGame.isWon(), currentGame.getCurrentLifeLesson(), currentGame.getGuessesHistory());
         } catch (GameNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -41,16 +41,15 @@ public class GameController {
 
     // Get current game status
     @GetMapping("/status")
-    public Game getStatus() {
+    public GameResponse getStatus() {
         try {
-            return gameService.getCurrentGame();
+            Game currentGame = gameService.getCurrentGame();
+            return new GameResponse("Game Status", currentGame.getAttemptsLeft(), currentGame.getCurrentLevel(), currentGame.isWon(), currentGame.getCurrentLifeLesson(), currentGame.getGuessesHistory());
         } catch (GameNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 }
-
-
 
 
 
