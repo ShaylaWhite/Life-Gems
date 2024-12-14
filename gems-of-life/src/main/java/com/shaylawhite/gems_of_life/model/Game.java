@@ -1,10 +1,15 @@
 package com.shaylawhite.gems_of_life.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+@Entity
 public class Game {
+    @Id
+    private Long id;
     private int[] randomCombination; // The secret combination the player needs to guess
     private List<int[]> guessesHistory; // List of past guesses
     private int attemptsLeft; // Number of remaining attempts
