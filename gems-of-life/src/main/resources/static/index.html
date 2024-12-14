@@ -1,76 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Gems of Life</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastermind Game</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<h1>Gems of Life</h1>
-<p><strong>Remaining Guesses:</strong> <span id="remaining-guesses">10</span></p>
-<p><strong>Current Level:</strong> <span id="current-level">1</span></p>
-<p><strong>Current Life Lesson:</strong> <span id="current-life-lesson">Start a new game to learn a life lesson!</span></p>
+<div class="game-container">
+    <h1>Mastermind Game with a Twist</h1>
 
-<h2>Feedback</h2>
-<p id="feedback">Start a new game first!</p>
+    <!-- Instructions -->
+    <p>Guess the correct combination of 4 numbers from 0 to 7!</p>
+    <p>You have 10 attempts remaining.</p>
 
-<input type="text" id="guess" placeholder="Enter your guess (e.g., 1234)" />
-<button onclick="makeGuess()">Make Guess</button>
-<button onclick="startNewGame()">Start New Game</button>
+    <!-- Game Feedback -->
+    <div id="feedback" class="feedback">
+        <p>Feedback: <span id="feedback-text">Make your first guess!</span></p>
+    </div>
 
-<h2>Guess History</h2>
-<ul id="guess-history">
-    <!-- Guess history items will appear here -->
-</ul>
+    <!-- Guess Form -->
+    <div class="guess-form">
+        <label for="guess">Enter your guess (4 numbers from 0 to 7):</label>
+        <input type="text" id="guess" maxlength="7" placeholder="e.g., 0 1 2 3" />
+        <button id="submit-guess">Submit Guess</button>
+    </div>
 
-<script>
-    // Placeholder for actual game state
-    let gameState = {
-        remainingAttempts: 10,
-        currentLevel: 1,
-        currentLifeLesson: "Start a new game to learn a life lesson!",
-        guessesHistory: [],
-    };
+    <!-- Guess History -->
+    <div class="history">
+        <h2>Guess History</h2>
+        <ul id="guess-history">
+            <!-- Guess history will be displayed here -->
+        </ul>
+    </div>
 
-    function updateUI() {
-        document.getElementById("remaining-guesses").textContent = gameState.remainingAttempts;
-        document.getElementById("current-level").textContent = gameState.currentLevel;
-        document.getElementById("current-life-lesson").textContent = gameState.currentLifeLesson;
-        const history = document.getElementById("guess-history");
-        history.innerHTML = "";
-        gameState.guessesHistory.forEach(guess => {
-            const li = document.createElement("li");
-            li.textContent = guess;
-            history.appendChild(li);
-        });
-    }
+    <!-- Guesses Remaining -->
+    <div id="remaining-guesses">
+        <p>Guesses Remaining: <span id="guesses-left">10</span></p>
+    </div>
 
-    function startNewGame() {
-        // Replace this with an actual API call
-        gameState = {
-            remainingAttempts: 10,
-            currentLevel: 1,
-            currentLifeLesson: "Grit",
-            guessesHistory: [],
-        };
-        updateUI();
-    }
+    <!-- Life Lesson / Gem -->
+    <div id="life-lesson">
+        <p>Life Lesson/Gem: <span id="gem">Stay persistent, the answer is out there!</span></p>
+    </div>
+</div>
 
-    function makeGuess() {
-        const guess = document.getElementById("guess").value;
-        if (!guess) return;
-
-        // Mock logic for guessing
-        if (guess === "1234") {
-            gameState.remainingAttempts--;
-            gameState.currentLevel++;
-            gameState.currentLifeLesson = "Self-Learning";
-            gameState.guessesHistory.push(`Guess: ${guess} - Feedback: Correct!`);
-        } else {
-            gameState.remainingAttempts--;
-            gameState.guessesHistory.push(`Guess: ${guess} - Feedback: Incorrect.`);
-        }
-        updateUI();
-    }
-</script>
+<script src="script.js"></script>
 </body>
 </html>
+
 
